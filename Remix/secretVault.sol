@@ -1,39 +1,80 @@
-// SPDX-License-Identifier: MIT 
-
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract Hotel{
+// Showcase contract inheritance
 
-    address payable public owner;
-    enum Statuses {Vacant,
-    Occupied}
-    event Occupy(address _occupant, uint256 _value);
+contract Ownable {
+    address owner;
 
-    Statuses public currentStatus;
+   
 
-    constructor(){
-        owner=payable(msg.sender);
-        currentStatus=Statuses.Vacant;
-    }
-
-    modifier onlyWhileVacant(){
-        require(currentStatus==Statuses.Vacant,"Currently Occupied");
+    modifier onlyOwner() {
+        require(msg.sender == owner, "must be owner");
         _;
     }
+}
 
-    modifier costs(uint _amount){
-        require(msg.value>=_amount,"Not enough ether provided");
-        _;
+contract SecretVault {
+    string secret;
+
+    constructor(string memory _secret) {
+        secret = _secret;
+    }
+
+    function getSecret() public view returns (string memory) {
+        return secret;
+    }
+}
+
+contract Secret is Ownable {
+    address secrect;
+    mapping(address=>uint) public users;
+    uint public counter=1;
+    address[] public secretVault=[0xdD870fA1b7C4700F2BD7f44238821C26f7392148];
+    constructor(string memory _secret) {
+        owner=msg.sender;
+        SecretVault _secretVault = new SecretVault(_secret);
+        secrect=address(_secretVault);
+        secretVault.push(secrect);
+        users[owner]=counter;
+        counter++;
+        super;
     }
 
 
 
-    function book() public payable onlyWhileVacant costs(1 ether) {
-        currentStatus=Statuses.Occupied;
-        // owner.transfer(msg.value);
-        (bool sent,bytes memory data)=owner.call{value:msg.value}("");
-        require(sent);
-        emit Occupy(msg.sender,msg.value);
+
+    function createSecret(string memory _secret) public{
+        owner=msg.sender;
+        uint check=users[owner];
+        if (check==0){
+             users[owner]=counter;
+        SecretVault anewSecretVault=new SecretVault(_secret);
+        address agetAdd=address(anewSecretVault);
+        secretVault.push(agetAdd);
+        counter++;
+          
+        }else{
+            SecretVault newSecretVault=new SecretVault(_secret);
+        address getAdd=address(newSecretVault);
+        secretVault[check]=getAdd;  
+        }    
     }
 
+    // function showSecret() public view onlyOwner returns(string memory){
+    //     uint _count=users[msg.sender];
+    //     return SecretVault(secretVault[_count]).getSecret();
+
+    // }
+
+    function check() public returns(uint){
+         owner=msg.sender;
+         uint acheck=users[owner];
+        return (acheck);
+    }
+
+    function getSecret(uint count) public view onlyOwner returns (string memory) {
+        address add=secretVault[count];
+        return SecretVault(add).getSecret();
+    }
 }
