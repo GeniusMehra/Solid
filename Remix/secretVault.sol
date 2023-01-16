@@ -73,8 +73,10 @@ contract Secret is Ownable {
         return (acheck);
     }
 
-    function getSecret(uint count) public view onlyOwner returns (string memory) {
-        address add=secretVault[count];
+    function getSecret() public view returns (string memory) {
+        // req
+        uint addCount=users[msg.sender];
+        address add=secretVault[addCount];
         return SecretVault(add).getSecret();
     }
 }
