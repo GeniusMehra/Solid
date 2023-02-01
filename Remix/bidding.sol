@@ -62,6 +62,8 @@ contract Bidding{
         return true;
     }
 
+// New function for returning pending money of  all bidders at once
+// Not in solidity
     function withdrawOther() public payable returns(bool){
         require(msg.sender==beneficiary,"Only Owner can do this");
         uint amount;
